@@ -13,117 +13,245 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedCategoryIndex = 0;
-  final List<String> categories = ['Shakes', 'Cocktail', 'Coffee', 'Tea'];
+  final List<String> categories = ['All', 'Juice', 'Tea', 'Shake'];
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final drink = context.watch<DrinksProvider>();
-    return Scaffold(
-      backgroundColor: const Color(0xFF5A2A2A),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xff8c3332), Color(0xff1e0909)],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+          title: _isSearching
+              ? TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    hintText: 'Search drinks...',
+                    hintStyle: TextStyle(color: Colors.white54),
+                    border: InputBorder.none,
+                  ),
+                  onChanged: (query) {
+                    context.read<DrinksProvider>().searchDrinks(query);
+                  },
+                )
+              : const Text(
+                  'Menu',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+          actions: [
+            IconButton(
+              icon: Icon(_isSearching ? Icons.close : Icons.search),
+              onPressed: () {
+                setState(() {
+                  if (_isSearching) {
+                    _isSearching = false;
+                    _searchController.clear();
+                    context.read<DrinksProvider>().clearSearch();
+                  } else {
+                    _isSearching = true;
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+        drawer: Drawer(
+          backgroundColor: const Color(0xFF5A2A2A),
+          child: ListView(
+            padding: EdgeInsets.zero,
             children: [
-              const Text(
-                'Welcome!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                categories[selectedCategoryIndex],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: Row(
+              const DrawerHeader(
+                decoration: BoxDecoration(color: Color(0xFF8B4B4B)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // Vertical Tabs
-                    SizedBox(
-                      width: 50,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(categories.length, (index) {
-                          final isSelected = index == selectedCategoryIndex;
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedCategoryIndex = index;
-                              });
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(vertical: 12),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? const Color(0xFF8B4B4B)
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: RotatedBox(
-                                quarterTurns: 3,
-                                child: Text(
-                                  categories[index],
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.white70,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-                    const VerticalDivider(
-                      color: Colors.white24,
-                      thickness: 1,
-                      indent: 10,
-                      endIndent: 10,
-                    ),
-                    const SizedBox(width: 12),
-                    // Item List
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: drink.drinks.length,
-                        itemBuilder: (context, index) {
-                          final item = drink.drinks[index];
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      DetailScreen(item: item),
-                                ),
-                              );
-                            },
-                            child: DrinkMenuCard(item: item),
-                          );
-                        },
+                    Icon(Icons.coffee, size: 40, color: Colors.white),
+                    SizedBox(height: 10),
+                    Text(
+                      'Coffee Shop',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
+              ListTile(
+                leading: const Icon(Icons.home, color: Colors.white),
+                title: const Text(
+                  'Home',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.shopping_cart, color: Colors.white),
+                title: const Text(
+                  'Cart',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  // Can navigate to Cart screen if implemented
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info, color: Colors.white),
+                title: const Text(
+                  'About Us',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
             ],
+          ),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 8.0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!_isSearching) ...[
+                  const Text(
+                    'Welcome!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                Text(
+                  categories[selectedCategoryIndex],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: Row(
+                    children: [
+                      // Vertical Tabs
+                      SizedBox(
+                        width: 50,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(categories.length, (index) {
+                            final isSelected = index == selectedCategoryIndex;
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedCategoryIndex = index;
+                                });
+                                context.read<DrinksProvider>().filterByCategory(
+                                  categories[index],
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? const Color(0xFF8B4B4B)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: RotatedBox(
+                                  quarterTurns: 3,
+                                  child: Text(
+                                    categories[index],
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.white70,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                      const VerticalDivider(
+                        color: Colors.white24,
+                        thickness: 1,
+                        indent: 10,
+                        endIndent: 10,
+                      ),
+                      const SizedBox(width: 12),
+                      // Item List
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: drink.drinks.length,
+                          itemBuilder: (context, index) {
+                            final item = drink.drinks[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DetailScreen(item: item),
+                                  ),
+                                );
+                              },
+                              child: DrinkMenuCard(item: item),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -27,12 +27,6 @@ class _DetailScreenState extends State<DetailScreen> {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.48,
               width: double.infinity,
-              padding: const EdgeInsets.only(
-                top: 90.0,
-                left: 24.0,
-                right: 24.0,
-                bottom: 24.0,
-              ),
               decoration: BoxDecoration(
                 color: item.bottomBackgroundColor,
                 borderRadius: const BorderRadius.only(
@@ -47,11 +41,20 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  // Title & Heart
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 90.0,
+                    left: 24.0,
+                    right: 24.0,
+                    bottom: 16.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // Title & Heart
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -112,6 +115,17 @@ class _DetailScreenState extends State<DetailScreen> {
                       ),
                     ],
                   ),
+                  if (item.description.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      item.description,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: item.textColor.withValues(alpha: 0.75),
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
                   const Spacer(),
                   // Price
                   Text(
@@ -173,7 +187,9 @@ class _DetailScreenState extends State<DetailScreen> {
                       ),
                     ),
                   ),
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
