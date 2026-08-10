@@ -1,5 +1,6 @@
 import 'package:coffee_shop/modals/drinks_model.dart';
 import 'package:coffee_shop/providers/drinks_provider.dart';
+import 'package:coffee_shop/screens/about_us_screen.dart';
 import 'package:coffee_shop/screens/details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final drink = context.watch<DrinksProvider>();
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(10),
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -132,6 +133,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AboutUsScreen(),
+                    ),
+                  );
                 },
               ),
             ],
@@ -318,14 +325,17 @@ class DrinkMenuCard extends StatelessWidget {
             left: 0,
             top: 0,
             bottom: 0,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.asset(
-                item.imagePath,
-                width: 110,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.fastfood, size: 60, color: Colors.white),
+            child: Hero(
+              tag: 'drink_${item.title}',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  item.imagePath,
+                  width: 110,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.fastfood, size: 60, color: Colors.white),
+                ),
               ),
             ),
           ),
