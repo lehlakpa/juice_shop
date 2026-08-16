@@ -1,8 +1,8 @@
-import 'package:coffee_shop/modals/drinks_model.dart';
+import 'package:coffee_shop/modals/product_model.dart';
 import 'package:flutter/material.dart';
 
 class DetailScreen extends StatefulWidget {
-  final DrinksModel item;
+  final ProductsModel item;
 
   const DetailScreen({super.key, required this.item});
 
@@ -96,7 +96,7 @@ class _DetailScreenState extends State<DetailScreen>
                           children: [
                             Expanded(
                               child: Text(
-                                '${item.title} Shakes',
+                                item.type.isNotEmpty ? '${item.title} ${item.type}' : item.title,
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.w800,
@@ -175,7 +175,7 @@ class _DetailScreenState extends State<DetailScreen>
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                '${item.rating.toInt()}/5',
+                                '${item.rating.toStringAsFixed(1)}/5',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -278,8 +278,8 @@ class _DetailScreenState extends State<DetailScreen>
             right: 16,
             child: Hero(
               tag: 'drink_${item.title}',
-              child: Image.asset(
-                item.imagePath,
+              child: Image.network(
+                item.imageUrl,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) => const Icon(
                   Icons.local_drink_rounded,

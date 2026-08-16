@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:ui';
 // import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coffee_shop/modals/product_model.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
@@ -11,8 +13,7 @@ class ProductProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // ================= CLOUDINARY =================
-
-  final String cloudName = 'dglxnraim';
+  final String cloudName = dotenv.env["CLOUD_NAME"]!;
   final String uploadPreset = 'flutter_coffee_test';
 
   // ================= STATE =================
@@ -68,6 +69,12 @@ class ProductProvider extends ChangeNotifier {
     required String title,
     required String description,
     required double price,
+    Color topBackgroundColor = const Color(0xff8c3332),
+    Color bottomBackgroundColor = const Color(0xFFFFFFFF),
+    Color buttonColor = const Color(0xff8c3332),
+    Color textColor = const Color(0xFF000000),
+    double rating = 5.0,
+    String type = '',
   }) async {
     try {
       // Start loading
@@ -85,6 +92,12 @@ class ProductProvider extends ChangeNotifier {
         description: description,
         price: price,
         imageUrl: imageUrl,
+        topBackgroundColor: topBackgroundColor,
+        bottomBackgroundColor: bottomBackgroundColor,
+        buttonColor: buttonColor,
+        textColor: textColor,
+        rating: rating,
+        type: type,
       );
 
       // 3. Save product to Firestore

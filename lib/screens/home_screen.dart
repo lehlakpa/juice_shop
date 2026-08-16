@@ -1,6 +1,8 @@
-import 'package:coffee_shop/modals/drinks_model.dart';
+import 'package:coffee_shop/modals/product_model.dart';
 import 'package:coffee_shop/providers/drinks_provider.dart';
+import 'package:coffee_shop/providers/products_provider.dart';
 import 'package:coffee_shop/screens/about_us_screen.dart';
+import 'package:coffee_shop/screens/add_product_screen.dart';
 import 'package:coffee_shop/screens/details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final drink = context.watch<DrinksProvider>();
+    final provider = context.read<ProductProvider>();
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
@@ -111,7 +113,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => AddProductScreen()),
+                  );
+                  // Navigator.pop(context);
                 },
               ),
               ListTile(
@@ -235,21 +241,67 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 12),
                       // Item List
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: drink.drinks.length,
-                          itemBuilder: (context, index) {
-                            final item = drink.drinks[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        DetailScreen(item: item),
-                                  ),
+                        child: StreamBuilder<List<ProductsModel>>(
+                          stream: provider.fetchProducts(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              );
+                            }
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text(
+                                  'Error: ${snapshot.error}',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return const Center(
+                                child: Text(
+                                  'No products found',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }
+
+                            final allProducts = snapshot.data!;
+                            final selectedCategory = categories[selectedCategoryIndex];
+                            
+                            final products = selectedCategory == 'All' 
+                                ? allProducts 
+                                : allProducts.where((p) => p.type.toLowerCase() == selectedCategory.toLowerCase()).toList();
+
+                            if (products.isEmpty) {
+                              return const Center(
+                                child: Text(
+                                  'No products in this category',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                final item = products[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            DetailScreen(item: item),
+                                      ),
+                                    );
+                                  },
+                                  child: DrinkMenuCard(item: item),
                                 );
                               },
-                              child: DrinkMenuCard(item: item),
                             );
                           },
                         ),
@@ -267,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class DrinkMenuCard extends StatelessWidget {
-  final DrinksModel item;
+  final ProductsModel item;
 
   const DrinkMenuCard({super.key, required this.item});
 
@@ -329,8 +381,8 @@ class DrinkMenuCard extends StatelessWidget {
               tag: 'drink_${item.title}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  item.imagePath,
+                child: Image.network(
+                  item.imageUrl,
                   width: 110,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) =>

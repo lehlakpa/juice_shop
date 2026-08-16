@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:coffee_shop/providers/Products_provider.dart';
+import 'package:coffee_shop/providers/products_provider.dart';
 import 'package:coffee_shop/screens/productlist_screens.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,6 +17,25 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final priceController = TextEditingController();
+  final typeController = TextEditingController();
+  final ratingController = TextEditingController();
+
+  final topBgColorController = TextEditingController(text: "0xff8c3332");
+  final bottomBgColorController = TextEditingController(text: "0xFFFFFFFF");
+  final buttonColorController = TextEditingController(text: "0xff8c3332");
+  final textColorController = TextEditingController(text: "0xFF000000");
+
+  Color _parseColor(String hexString) {
+    try {
+      String hex = hexString.replaceAll('#', '').replaceAll('0x', '');
+      if (hex.length == 6) {
+        hex = 'FF$hex';
+      }
+      return Color(int.parse(hex, radix: 16));
+    } catch (e) {
+      return const Color(0xff8c3332); // Fallback color
+    }
+  }
 
   XFile? selectedImage;
   Uint8List? selectedImageBytes;
@@ -73,6 +92,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
       return;
     }
 
+    final double rating = double.tryParse(ratingController.text.trim()) ?? 5.0;
+
     final provider = context.read<ProductProvider>();
 
     final success = await provider.addProduct(
@@ -80,6 +101,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
       title: titleController.text.trim(),
       description: descriptionController.text.trim(),
       price: price,
+      type: typeController.text.trim(),
+      rating: rating,
+      topBackgroundColor: _parseColor(topBgColorController.text.trim()),
+      bottomBackgroundColor: _parseColor(bottomBgColorController.text.trim()),
+      buttonColor: _parseColor(buttonColorController.text.trim()),
+      textColor: _parseColor(textColorController.text.trim()),
     );
 
     if (!mounted) return;
@@ -91,6 +118,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
       titleController.clear();
       descriptionController.clear();
       priceController.clear();
+      typeController.clear();
+      ratingController.clear();
 
       setState(() {
         selectedImage = null;
@@ -112,8 +141,28 @@ class _AddProductScreenState extends State<AddProductScreen> {
     titleController.dispose();
     descriptionController.dispose();
     priceController.dispose();
+    typeController.dispose();
+    ratingController.dispose();
+    topBgColorController.dispose();
+    bottomBgColorController.dispose();
+    buttonColorController.dispose();
+    textColorController.dispose();
 
     super.dispose();
+  }
+
+  Widget _buildColorInput(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: "e.g. 0xff8c3332 or #8c3332",
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -214,6 +263,39 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+
+            const SizedBox(height: 15),
+
+            // ================= TYPE =================
+            TextField(
+              controller: typeController,
+              enabled: !provider.isLoading,
+              decoration: const InputDecoration(
+                labelText: "Type (e.g. Shakes, Tea)",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // ================= RATING =================
+            TextField(
+              controller: ratingController,
+              enabled: !provider.isLoading,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: "Rating (e.g. 5.0)",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            // ================= COLORS =================
+            _buildColorInput("Top Background Color", topBgColorController),
+            _buildColorInput("Bottom Background Color", bottomBgColorController),
+            _buildColorInput("Button Color", buttonColorController),
+            _buildColorInput("Text Color", textColorController),
 
             const SizedBox(height: 25),
             InkWell(

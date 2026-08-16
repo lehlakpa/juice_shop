@@ -1,5 +1,5 @@
 import 'package:coffee_shop/modals/product_model.dart';
-import 'package:coffee_shop/providers/Products_provider.dart';
+import 'package:coffee_shop/providers/products_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
